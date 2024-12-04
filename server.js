@@ -1,19 +1,24 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+const user = require("./models/UserSchema");
+const userRead = require("./models/UserReadSchema");
+const books = require("./models/BookSchema");
+
+const userRoutes = require("./route/UserRoutes");
 
 const app = express();
-
 app.use(express.json());
 
-function main() {
-  app.listen(3000, () => {
+async function main() {
+  app.listen(process.env.PORT, () => {
     console.log("Server Listening at port 3000...");
   });
-
-  mongoose
-    .connect(
-      "mongodb+srv://subh:nainasweetheart@cluster0.nzujy.mongodb.net/Library-Management"
-    )
+  await mongoose
+    .connect(process.env.DB_URL)
     .then(() => {
       console.log("Connected!");
     })
@@ -22,8 +27,13 @@ function main() {
     });
 }
 
-app.get("/", (req, res) => {
-  res.send("Hii there this side Sourav");
+app.get("/", async (req, res) => {
+  return res.send("Hii there this side Sourav");
 });
+
+// a route for sign in
+app.use("/user", userRoutes);
+
+// a route for adding books by librarian
 
 main(); // Main Function
