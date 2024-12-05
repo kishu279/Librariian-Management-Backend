@@ -6,13 +6,59 @@ const jwt = require("jsonwebtoken");
 const user = require("./../models/UserSchema");
 const userRead = require("./../models/UserReadSchema");
 const book = require("./../models/BookSchema");
-const { route } = require("./UserRoutes");
+const auth = require("./../authentication/middleware");
+const { parse } = require("dotenv");
 
 const app = express();
 const router = express.Router();
 
 app.use(express.json());
 
-router.post("/addbooks", async (req, res) => {});
+router.post("/addbooks", auth, async (req, res) => {
+  const { title, pages, author } = req.body;
+  console.log(req.body);
+  if (!title || pages == null || author == null) {
+    return res.status(400).json({
+      success: false,
+      message: ",give all required fields",
+    });
+  }
+
+  if (req.isLib == false) {
+    return res.status(400).json({
+      success: false,
+      message: "Authentication Failed",
+    });
+  }
+
+  try {
+    await book.create({
+      title: title,
+      pages: pages,
+      author: author,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "finely created",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/issueBooks", auth, async (req, res) => {
+  const { title } = (req.body);
+
+  console.log(title);
+  if (!title) {
+    return res.status(400).json({
+      success: false,
+      message: "pls add books",
+    });
+  }
+
+
+});
 
 module.exports = router;

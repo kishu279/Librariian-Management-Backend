@@ -55,7 +55,12 @@ router.post("/signup", async (req, res) => {
 });
 
 router.post("/signin", async (req, res) => {
-  const { username, email, lib, password } = req.body;
+  const { email, lib, password } = req.body;
+
+  if (!email || lib == null || !password) {
+    console.log("enter all fields");
+    return res.status(404);
+  }
 
   const existingUser = await user.findOne({ email });
 
@@ -66,8 +71,8 @@ router.post("/signin", async (req, res) => {
     });
   }
 
-  const isPass = await bcrypt.compare(password, existingUser.password);
   try {
+    const isPass = bcrypt.compare(password, existingUser.password);
     if (!isPass) {
       return res.status(401).json({
         success: false,
@@ -75,13 +80,9 @@ router.post("/signin", async (req, res) => {
       });
     }
 
-    const token = await jwt
-      .sign({ email, lib }, process.env.JWT_SECRET_KEY, {
-        expiresIn: "5h",
-      })
-      .then(() => {
-        console.log("signed in");
-      });
+    const token = jwt.sign({ email, lib }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "5h",
+    });
 
     return res.status(200).send(token);
   } catch (error) {
