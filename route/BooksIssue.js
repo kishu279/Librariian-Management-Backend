@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const user = require("./../models/UserSchema");
 const userRead = require("./../models/UserReadSchema");
-const book = require("./../models/BookSchema");
+const books = require("./../models/BookSchema");
 const auth = require("./../authentication/middleware");
 const { parse } = require("dotenv");
 
@@ -48,9 +48,8 @@ router.post("/addbooks", auth, async (req, res) => {
 });
 
 router.post("/issueBooks", auth, async (req, res) => {
-  const { title } = (req.body);
+  const { title } = req.body;
 
-  console.log(title);
   if (!title) {
     return res.status(400).json({
       success: false,
@@ -58,7 +57,28 @@ router.post("/issueBooks", auth, async (req, res) => {
     });
   }
 
+  const bookAvail = await books.findOne({ title: title });
 
+  if (!bookAvail) {
+    return res.status(400).json({
+      success: false,
+      message: "book not found",
+    });
+  }
+
+  const userAvail = await user.findOne({ email: req.emailId });
+
+  userRead.create({
+    UserId: userAvail._id,
+    BookId: bookAvail._id,
+    issued: false,
+    issuedDate: Date.now(),
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "book added successfully",
+  });
 });
 
 module.exports = router;
