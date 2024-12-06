@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 const router = express.Router();
 
-// SIGN IN
+// SIGN UP
 router.post("/signup", async (req, res) => {
   const { username, email, lib, password } = req.body;
 
@@ -54,6 +54,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+// SIGN IN
 router.post("/signin", async (req, res) => {
   const { email, lib, password } = req.body;
 

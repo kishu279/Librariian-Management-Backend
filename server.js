@@ -25,7 +25,7 @@ async function main() {
     })
     .catch((error) => {
       console.log("error while connecting");
-    });
+    }); 
 }
 
 app.get("/", async (req, res) => {

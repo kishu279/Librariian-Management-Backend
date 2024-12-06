@@ -81,4 +81,37 @@ router.post("/issueBooks", auth, async (req, res) => {
   });
 });
 
+router.put("/availBooks", auth, async (req, res) => {
+  const isLib = req.isLib;
+
+  if (!isLib) {
+    return res.status(400).json({
+      success: false,
+      message: "Authentication Failed",
+    });
+  }
+
+  const { id, state } = req.query;
+  try {
+    const bookToIssue = await userRead.updateOne(
+      { _id: id },
+      { $set: { issued: state } }
+    );
+
+    if (bookToIssue) {
+      return res.status(200).json({
+        success: true,
+        message: bookToIssue,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: bookToIssue,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 module.exports = router;
