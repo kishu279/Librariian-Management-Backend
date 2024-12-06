@@ -85,32 +85,30 @@ router.put("/availBooks", auth, async (req, res) => {
   const isLib = req.isLib;
 
   if (!isLib) {
-    return res.status(400).json({
+    return res.status(404).json({
       success: false,
-      message: "Authentication Failed",
+      message: "not eligible to avail books",
     });
   }
 
-  const { id, state } = req.query;
   try {
-    const bookToIssue = await userRead.updateOne(
+    const { id, state } = req.query;
+
+    console.log(id);
+    const result = await userRead.updateOne(
       { _id: id },
       { $set: { issued: state } }
     );
 
-    if (bookToIssue) {
-      return res.status(200).json({
-        success: true,
-        message: bookToIssue,
-      });
-    }
-
     return res.status(200).json({
       success: true,
-      message: bookToIssue,
+      message: result,
     });
   } catch (error) {
-    console.log(error);
+    return res.status(404).json({
+      success: false,
+      message: error,
+    });
   }
 });
 
