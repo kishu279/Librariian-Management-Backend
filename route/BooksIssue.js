@@ -94,10 +94,9 @@ router.put("/availBooks", auth, async (req, res) => {
   try {
     const { id, state } = req.query;
 
-    console.log(id);
     const result = await userRead.updateOne(
       { _id: id },
-      { $set: { issued: state } }
+      { $set: { issued: state, issuedDate: Date.now() } }
     );
 
     return res.status(200).json({
@@ -110,6 +109,36 @@ router.put("/availBooks", auth, async (req, res) => {
       message: error,
     });
   }
-});
+}); // this is working
+// http://localhost:3000/availBooks?id=675138eed476ff40161a57c8&state=true
+
+const update = async (req, res) => {
+  console.log("Hii");
+  try {
+    // delete all books that have crossed one week
+    const booksIssued = await userRead.find({ issued: true });
+    console.log(Date.now());
+
+    const toDelete = booksIssued.filter(
+      (data) => Date.now() >= data.issuedDate.getTime() + 300000
+    );
+
+    for (let data of toDelete) {
+      console.log(await userRead.deleteOne({ _id: data._id })); // acknoledgement for deleting data
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: typeof booksIssued,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error,
+    });
+  }
+};
+
+router.get("/update", auth, update);
 
 module.exports = router;
